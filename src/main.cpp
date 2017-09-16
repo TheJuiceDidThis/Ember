@@ -977,7 +977,7 @@ int64_t GetProofOfWorkReward(int64_t nHeight, int64_t nFees)
 // miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees)
 {
-    int64_t nSubsidy = nCoinAge * COIN_YEAR_REWARD * 33 / (365 * 33 + 8);
+    int64_t nSubsidy = COIN_YEAR_REWARD * 33 / (365 * 33 + 8) * nCoinAge;  //fixes overflow at 38.81million nCoinAge with reduced accuracy....won't match old code exactly unless .0 is added to a number to force floatingpoint... still debating... 
     if(nBestHeight > 525600) // ~3 Years
     {
         nSubsidy = nCoinAge * 0.1 * 33 / (365 * 33 + 8); // Semi-Hardcap (0.01%)
