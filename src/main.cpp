@@ -7,7 +7,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "alert.h"coin
+#include "alert.h"
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "db.h"
