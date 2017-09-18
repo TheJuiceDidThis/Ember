@@ -7,7 +7,7 @@
 #include <boost/filesystem.hpp>
 #include <boost/filesystem/fstream.hpp>
 
-#include "alert.h"
+#include "alert.h"coin
 #include "chainparams.h"
 #include "checkpoints.h"
 #include "db.h"
@@ -977,7 +977,18 @@ int64_t GetProofOfWorkReward(int64_t nHeight, int64_t nFees)
 // miner's coin stake reward based on coin age spent (coin-days)
 int64_t GetProofOfStakeReward(int64_t nCoinAge, int64_t nFees)
 {
-    int64_t nSubsidy = COIN_YEAR_REWARD * 33 / (365 * 33 + 8) * nCoinAge;  //fixes overflow at 38.81million nCoinAge with reduced accuracy....won't match old code exactly unless .0 is added to a number to force floatingpoint... still debating... 
+    int64_t int64MAX = 9223372036854775807; //  2^63 - 1   see http://cpp.sh/5v62 to compare fixes to the overflow bug
+    int64_t overflowmultiple = nCoinAge / (int64MAX / (33 * COIN_YEAR_REWARD) );  // will contain the whole number of times nCoinAge goes past the nCoinAge overflow limit where the calculation in the brackets is the overflow limit for nCoinAge
+    nSubsidy =  nCoinAge * COIN_YEAR_REWARD * 33 / (365 * 33 + 8); //original line code - additional code needed to fix overflow
+    if(overflowmultiple%2!=0)
+    {
+        if( nSubsidy < 0 ) overflowmultiple ++;     // if multiple is ODD number the nSubsidy bugged value is negative so fix value here by adding an additional overflow amount by incrementing the multiple by 1
+                     else  overflowmultiple --;    //sanitycheck - if nSubsidy is not negative then multiple can't be an ODD number, so something is not right - this is normal only very near the overflow limits due to the integer calcualations so this problem is dealt with here    
+    }
+    int64_t additional_nSubsidy = int64MAX / (365 * 33 + 8) * overflowmultiple ; // the product of the multiple and the nSubsidy overflow limit is calculated to be added on to the value given by the overflowed calculation
+    nSubsidy+= additional_nSubsidy ;  // added to original code to fix overflow - has zero value before nCoinAge hits the overflow limit 
+
+    
     if(nBestHeight > 525600) // ~3 Years
     {
         nSubsidy = nCoinAge * 0.1 * 33 / (365 * 33 + 8); // Semi-Hardcap (0.01%)
