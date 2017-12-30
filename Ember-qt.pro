@@ -183,6 +183,21 @@ contains(BITCOIN_NEED_QT_PLUGINS, 1) {
     QTPLUGIN += qcncodecs qjpcodecs qtwcodecs qkrcodecs qtaccessiblewidgets
 }
 
+#Build latest libdb 
+#Since windows build seems to be ok we'll only add this on linux builds
+!win32 {
+    INCLUDEPATH += src/libdb/build_unix
+    genlibdb.commands = cd $$PWD/src/libdb/build_unix && CC=$$QMAKE_CC CXX=$$QMAKE_CXX ../dist/configure --enable-cxx && $(MAKE) OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\"    
+
+}
+!win32 {
+    LIBS += $$PWD/src/libdb/build_unix/libdb_cxx.a $$PWD/src/libdb/build_unix/libdb.a
+}
+genlibdb.target = $$PWD/src/libdb/libdb_cxx.a
+genlibdb.depends = FORCE
+QMAKE_EXTRA_TARGETS += genlibdb
+QMAKE_CLEAN += cd $$PWD/src/libdb/ && $(MAKE) clean
+
 INCLUDEPATH += src/leveldb/include src/leveldb/helpers
 LIBS += $$PWD/src/leveldb/libleveldb.a $$PWD/src/leveldb/libmemenv.a
 SOURCES += src/txdb-leveldb.cpp \
@@ -214,7 +229,12 @@ SOURCES += src/txdb-leveldb.cpp \
     #genleveldb.commands = cd $$PWD/src/leveldb && $(MAKE) CC=$$QMAKE_CC CXX=$$QMAKE_CXX TARGET_OS=OS_WINDOWS_CROSSCOMPILE OPT=\"$$QMAKE_CXXFLAGS $$QMAKE_CXXFLAGS_RELEASE\" libleveldb.a libmemenv.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libleveldb.a && $$QMAKE_RANLIB $$PWD/src/leveldb/libmemenv.a
 }
 genleveldb.target = $$PWD/src/leveldb/libleveldb.a
-genleveldb.depends = FORCE
+!win32 {
+    genleveldb.depends = genlibdb    
+} else {
+    genleveldb.depends = FORCE
+}
+
 PRE_TARGETDEPS += $$PWD/src/leveldb/libleveldb.a
 QMAKE_EXTRA_TARGETS += genleveldb
 # Gross ugly hack that depends on qmake internals, unfortunately there is no other way to do it.

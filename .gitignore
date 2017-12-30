@@ -13,6 +13,19 @@ Emberd
 src/Ember
 src/Emberd
 src/test_Ember
+#berkeleydb
+src/libdb/build_unix
+src/libdb/Makefile
+src/libdb/clib_port.h
+src/libdb/config.log
+src/libdb/config.status
+src/libdb/db.h
+src/libdb/db_config.h
+src/libdb/db_cxx.h
+src/libdb/db_int.h
+src/libdb/dist/config.log
+src/libdb/include.tcl
+src/libdb/libtool
 .Ember
 #compilation and Qt preprocessor part
 *.qm
